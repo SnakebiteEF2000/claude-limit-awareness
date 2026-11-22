@@ -1,0 +1,18 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": "python3 '/absolute/path/to/claude-limit-awareness/usage_limits.py' collect"
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 '/absolute/path/to/claude-limit-awareness/usage_limits.py' show"
+          }
+        ]
+      }
+    ]
+  }
+}
