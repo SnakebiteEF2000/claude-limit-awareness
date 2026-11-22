@@ -11,37 +11,31 @@ Check your Claude plan usage from the Claude Code terminal. See how much of your
 
 ## Quick install
 
-You’ll need the Claude Code CLI, Python 3.8 or newer, and Git. These commands are for macOS and Linux. Sign in to Claude Code as usual before checking usage.
+You’ll need the Claude Code CLI, Python 3.8 or newer, Node.js with npm, and Git on macOS or Linux. Sign in to Claude Code before checking usage.
 
 ```sh
 git clone git@github.com:SnakebiteEF2000/claude-limit-awareness.git
 cd claude-limit-awareness
-
-mkdir -p "$HOME/.claude/claude-limit-awareness" "$HOME/.claude/skills/claude-usage-limits"
-cp usage_limits.py "$HOME/.claude/claude-limit-awareness/"
-cp skills/claude-usage-limits/SKILL.md "$HOME/.claude/skills/claude-usage-limits/"
-
-sed "s|/absolute/path/to/claude-limit-awareness|$HOME/.claude/claude-limit-awareness|g" \
-  settings.example.json > "$HOME/.claude/claude-limit-awareness/settings.json"
-
-claude --settings "$HOME/.claude/claude-limit-awareness/settings.json"
+python3 install.py
 ```
 
-If you already have the repo, start with the `mkdir` command from the repo directory. The quick install loads the collector as the status line for that launch. It leaves your regular settings file in place.
+If you already have the repo, run `python3 install.py` from its directory. The installer configures regular Claude Code launches with a compact [ccstatusline](https://github.com/sirmalloc/ccstatusline) row showing the model, Git branch, and context bar. It replaces the status-line command, backs up your previous settings, and preserves your existing hooks while adding the usage shortcut.
 
-In the new session, send a normal prompt first so Claude Code has usage data. Then type `usage limits`. Look for a hook message with the two limits and their reset times. To test agent access, ask “How much Claude quota do I have left?”
+Start a new Claude Code session as usual. Send a normal prompt, then type `usage limits` for the local snapshot or run `/claude-usage-limits` to have Claude explain it.
 
-### Enable it for regular launches
+To customize the bar, open its editor with the installed executable and config:
 
-Merge the generated settings into `~/.claude/settings.json`. Add the example `UserPromptSubmit` entry to your existing hook list, and add `statusLine` if you don’t have one. For project-only setup, merge those entries into `.claude/settings.local.json` in that project instead.
+```sh
+~/.claude/claude-limit-awareness/node_modules/.bin/ccstatusline --config ~/.claude/claude-limit-awareness/ccstatusline.json
+```
 
-If you already have a status-line command you want to keep, configure it to pass a copy of the same JSON stdin to `python3 ~/.claude/claude-limit-awareness/usage_limits.py collect` and continue emitting its usual display output. [Claude Code settings](https://code.claude.com/docs/en/settings) · [Status-line commands](https://code.claude.com/docs/en/statusline)
+Save your layout in the editor. The installer already wires the status-line command to the usage collector.
 
 ## Troubleshooting
 
 - **A limit says unavailable.** The hook shows the current session’s latest snapshot. Usage may be missing before the first response, after a reset, or on plans that don’t expose that window. Open `/usage` to check directly.
 - **You need the Fable limit.** Use `/usage`. Claude Code’s documented status-line data exposes the five-hour and all-models weekly windows. Fable availability depends on your plan. [Status-line data](https://code.claude.com/docs/en/statusline) · [Fable plan eligibility](https://support.claude.com/en/articles/15424964-claude-fable-models-on-your-plan)
-- **Claude answered the trigger as a normal message.** Try `usage limits` or `usage limits please` exactly. Other phrasing can be handled by the agent through the skill. If the exact trigger still goes to Claude, launch with the generated settings file and check that hooks are enabled.
+- **Claude answered the trigger as a normal message.** Try `usage limits` or `usage limits please` exactly. Other phrasing can be handled by the agent through the skill. If the exact trigger still goes to Claude, start a new session and check that hooks are enabled.
 - **The skill is missing.** Start a new Claude Code session and check that the file exists at `~/.claude/skills/claude-usage-limits/SKILL.md`. [Claude Code skills](https://code.claude.com/docs/en/skills)
 
 The tool stores only the supported usage numbers, reset times, and snapshot time in a per-session cache under `~/.cache/claude-limit-awareness/`. You can delete that directory to clear the snapshots.
